@@ -405,6 +405,7 @@ ul { list-style: none; }
 .card-img--db   { background: linear-gradient(135deg, #eef2f7 0%, #dce6f0 100%); }
 .card-img--ecom { background: linear-gradient(135deg, #f0f4ee 0%, #deecd8 100%); }
 .card-img--fmcg { background: linear-gradient(135deg, #fef9ec 0%, #fdebc8 100%); }
+.card-img--chat { background: linear-gradient(135deg, #f3f0fa 0%, #e2daf3 100%); }
 
 /* ── Skills ── */
 .skill-group { margin-bottom: 1.5rem; }

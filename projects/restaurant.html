@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant Sales Optimization — Supawit Naewjampa</title>
+  <meta name="description" content="A 6-table restaurant database in MySQL, analyzed with SQL across menu revenue, customer behavior, staff and table usage, and payment methods — turned into business strategies. By Supawit Naewjampa." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍜</text></svg>" />
+  <link rel="stylesheet" href="../style.css?v=5" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="proj-page">
+
+  <nav class="nav nav--proj" id="nav">
+    <a href="../index.html" class="nav-logo">SN</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#portfolio">← All Projects</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <article class="proj proj--rest">
+    <div class="proj-cover" style="background-image:url('../images/cover-restaurant.jpg')"></div>
+    <nav class="proj-toc" aria-label="On this page"></nav>
+    <div class="proj-container">
+
+      <header class="proj-hero">
+        <div class="proj-eyebrow">🍜 Case Study · 2025</div>
+        <h1>Restaurant Sales Optimization</h1>
+        <p class="proj-lead">Designing a restaurant database from scratch and using SQL to turn its orders, menu, staff, tables, and payments into practical strategies for higher revenue and customer satisfaction.</p>
+        <p class="proj-stack"><strong>Stack:</strong> MySQL · SQL · ER Diagram · Power BI · Business Strategy</p>
+        <div class="proj-results">
+          <div><span class="pr-val">6</span><span class="pr-lab">Tables (ER model)</span></div>
+          <div><span class="pr-val">180+</span><span class="pr-lab">Orders modeled</span></div>
+          <div><span class="pr-val">4</span><span class="pr-lab">Analysis areas</span></div>
+          <div><span class="pr-val">16</span><span class="pr-lab">Strategies proposed</span></div>
+        </div>
+      </header>
+
+      <section class="proj-section">
+        <h2>1 · Introduction</h2>
+        <p>This project analyzes a restaurant’s operational data to derive actionable insights for improving business performance. A structured database covering customer orders, menu items, employee performance, table management, and payment transactions was used to uncover key trends and opportunities.</p>
+        <p>The analysis addresses four areas: <strong>revenue by menu item</strong>, <strong>customer spending behavior</strong>, <strong>employee and table efficiency</strong>, and <strong>payment method preferences</strong>. Through SQL queries and data-driven insights, it delivers strategic recommendations to optimize the menu, increase customer engagement, streamline operations, and improve payments.</p>
+        <p class="proj-note">ℹ️ The dataset is <strong>synthetic</strong> — designed and populated by me (Thai restaurant, Jan–May 2025) to practice end-to-end database design and analysis.</p>
+      </section>
+
+      <section class="proj-section">
+        <h2>2 · Data Preparation</h2>
+        <p>The database was designed with an <strong>ER diagram</strong>, created in MySQL (<code>CREATE TABLE</code>), and populated with order data (<code>INSERT</code>). Six related tables:</p>
+        <table class="proj-table">
+          <thead><tr><th>Table</th><th>Holds</th></tr></thead>
+          <tbody>
+            <tr><td><code>Customer</code></td><td>customer profile</td></tr>
+            <tr><td><code>Menu</code></td><td>menu item, category (Food / Drink / Dessert), price</td></tr>
+            <tr><td><code>OrderInfo</code></td><td>one order — customer, employee, table, time, total amount</td></tr>
+            <tr><td><code>OrderDetail</code></td><td>items in each order — quantity, price at order time</td></tr>
+            <tr><td><code>Employee</code></td><td>staff name and position</td></tr>
+            <tr><td><code>Payment</code></td><td>payment method per order</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="proj-section">
+        <h2>3 · Analysis</h2>
+
+        <h3>3.1 Revenue by menu items</h3>
+        <p>Sales performance of each menu item — total revenue, order frequency, and category breakdown (Food, Drink, Dessert).</p>
+        <pre><code>SELECT m.MenuName, m.Category,
+       COUNT(od.OrderDetailID)                AS OrderCount,
+       SUM(od.Quantity)                       AS TotalQuantity,
+       SUM(od.Quantity * od.PriceAtOrderTime) AS TotalRevenue
+FROM OrderDetail od
+JOIN Menu m ON od.MenuID = m.MenuID
+GROUP BY m.MenuID, m.MenuName, m.Category
+ORDER BY TotalRevenue DESC
+LIMIT 10;</code></pre>
+        <ul>
+          <li><strong>Green Curry</strong> and <strong>Pad Thai</strong> were the top revenue items, driven by high order volume and unit price.</li>
+          <li>The <strong>Food</strong> category dominated revenue (~80–90%); Drinks and Desserts contributed little — an underperforming area.</li>
+          <li>Opportunity: combo deals (e.g. Green Curry + Thai Iced Tea) and new Drink/Dessert items.</li>
+        </ul>
+
+        <h3>3.2 Customer behavior</h3>
+        <p>Spending patterns — average order value, items per order, and visit frequency.</p>
+        <pre><code>SELECT c.CustomerID, c.CustomerName,
+       COUNT(o.OrderID)    AS OrderCount,
+       AVG(o.TotalAmount)  AS AvgOrderAmount,
+       SUM(o.TotalAmount)  AS TotalSpent,
+       AVG(od.Quantity)    AS AvgItemsPerOrder
+FROM Customer c
+LEFT JOIN OrderInfo   o  ON c.CustomerID = o.CustomerID
+LEFT JOIN OrderDetail od ON o.OrderID    = od.OrderID
+GROUP BY c.CustomerID, c.CustomerName
+ORDER BY TotalSpent DESC
+LIMIT 10;</code></pre>
+        <ul>
+          <li>Customers spend about <strong>$30–40 per order</strong> with ~1.5 items — a mid-range dining experience.</li>
+          <li><strong>No repeat customers</strong> appeared in January–April — a loyalty gap.</li>
+          <li>Opportunity: loyalty programs and incentives for bigger orders (e.g. free dessert over $35).</li>
+        </ul>
+
+        <h3>3.3 Employee &amp; table management</h3>
+        <p>Order handling by employee and table usage by capacity and revenue.</p>
+        <pre><code>SELECT e.EmployeeName, e.Position,
+       COUNT(o.OrderID)   AS OrderCount,
+       SUM(o.TotalAmount) AS TotalRevenue
+FROM OrderInfo o
+JOIN Employee e ON o.EmployeeID = e.EmployeeID
+GROUP BY e.EmployeeID, e.EmployeeName, e.Position
+ORDER BY OrderCount DESC, TotalRevenue DESC
+LIMIT 5;</code></pre>
+        <ul>
+          <li>A few waiters handled the most orders — key people for service delivery.</li>
+          <li>Tables of every size (4, 8, 10, 16 seats) had similar usage (~10 orders each), but <strong>16-seat tables</strong> had the highest average order value (~$35).</li>
+          <li>Opportunity: upselling training, more large tables, and group promotions.</li>
+        </ul>
+
+        <h3>3.4 Payment methods</h3>
+        <p>Distribution of Cash, Credit Card, and Mobile Payment and their effect on order value and revenue.</p>
+        <pre><code>SELECT p.PaymentMethod,
+       COUNT(p.PaymentID) AS PaymentCount,
+       AVG(o.TotalAmount) AS AvgOrderAmount,
+       SUM(o.TotalAmount) AS TotalRevenue
+FROM Payment p
+JOIN OrderInfo o ON p.OrderID = o.OrderID
+GROUP BY p.PaymentMethod
+ORDER BY TotalRevenue DESC;</code></pre>
+        <ul>
+          <li>Payment methods split evenly (~33% each), with similar average order values ($30.50–31.75).</li>
+          <li>Credit Card ($1,062.50) and Mobile Payment ($1,047.75) slightly out-earned Cash ($1,006.50).</li>
+          <li>Opportunity: Mobile Payment discounts to reduce cash-handling costs.</li>
+        </ul>
+      </section>
+
+      <section class="proj-section">
+        <h2>4 · From Insights to Business Strategy</h2>
+        <p>Each insight area was turned into concrete strategies, with an example and an expected impact.</p>
+        <table class="proj-table">
+          <thead><tr><th>Area</th><th>Strategy</th><th>Expected impact</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="4"><strong>Menu</strong></td><td>Combo promotions — e.g. “Thai Classic Combo” (Pad Thai + Thai Iced Tea) at $15 instead of $17.50</td><td>Avg order value ~$30 → $35; Drink/Dessert sales +10–15%</td></tr>
+            <tr><td>Optimize inventory for top sellers (bulk deals on coconut milk, more noodle stock)</td><td>Fewer stockouts; ingredient cost −5–10%</td></tr>
+            <tr><td>New drinks &amp; desserts (e.g. Mango Passionfruit Smoothie, Thai Tea Panna Cotta), tested for a month</td><td>Drink/Dessert revenue share +10–15%</td></tr>
+            <tr><td>Seasonal menus (e.g. Songkran set in April)</td><td>Festive-period sales +10–20%</td></tr>
+            <tr><td rowspan="4"><strong>Customers</strong></td><td>Points-based loyalty program (1 point per $10, free item at 20 points)</td><td>Repeat visits +15–20%</td></tr>
+            <tr><td>“Trio Deal” — incentives for 3+ items per order</td><td>Items per order 1.5 → 2–3; order value +10%</td></tr>
+            <tr><td>Personalized marketing (SMS offers to one-time visitors)</td><td>Repeat purchases +10–15%</td></tr>
+            <tr><td>Weekday-lunch promotion for slow periods</td><td>Slow-period traffic +20–30%</td></tr>
+            <tr><td rowspan="4"><strong>Staff &amp; tables</strong></td><td>Upselling training with a monthly bonus for top seller</td><td>Avg order value +10–15%</td></tr>
+            <tr><td>More / flexible large-table layouts</td><td>Large-table revenue +15%</td></tr>
+            <tr><td>“Family Feast Set” for groups of 12+</td><td>Large-table usage and order value +20%</td></tr>
+            <tr><td>Online reservations &amp; SMS queue alerts</td><td>Daily capacity +15–20%</td></tr>
+            <tr><td rowspan="4"><strong>Payments</strong></td><td>Cashback for Mobile Payment (e.g. via a wallet partner)</td><td>Mobile Payment share → 40–50%; cash-handling cost −10%</td></tr>
+            <tr><td>Upgrade POS for QR payments</td><td>More convenience, fewer errors</td></tr>
+            <tr><td>“Cashless Week” — 3% off non-cash payments</td><td>Cash-handling cost −10–15%</td></tr>
+            <tr><td>Target frequent Mobile Payment users with coupons</td><td>Loyal-customer sales +10%</td></tr>
+          </tbody>
+        </table>
+        <h3>Implementation &amp; measurement</h3>
+        <ul>
+          <li><strong>Pilot and measure</strong> each strategy for 1–2 months, tracking average order value, daily customers, table turnover, and Mobile Payment adoption.</li>
+          <li><strong>Collect feedback</strong> with short surveys or table QR codes.</li>
+          <li><strong>Monitor with a dashboard</strong> (Power BI or Excel), updated weekly.</li>
+        </ul>
+      </section>
+
+      <section class="proj-section">
+        <h2>5 · Promotion Tracking (simulation)</h2>
+        <p>To practice measuring a promotion’s effect, I added promotion-tracking tables and simulated a post-promotion month (May 2025) with the <em>Trio Deal</em> and a 5% <em>Mobile Payment discount</em>, then compared it with the pre-promotion months in SQL.</p>
+        <pre><code>SELECT DATE_FORMAT(OrderTime, '%Y-%m')  AS Month,
+       COUNT(*)                         AS OrderCount,
+       SUM(TotalAmount)                 AS TotalRevenue,
+       ROUND(AVG(TotalAmount), 2)       AS AvgOrderAmount,
+       CASE WHEN DATE_FORMAT(OrderTime, '%Y-%m') = '2025-05'
+            THEN 'Post-Promotion' ELSE 'Pre-Promotion' END AS Period
+FROM OrderInfo
+GROUP BY DATE_FORMAT(OrderTime, '%Y-%m')
+ORDER BY Month;</code></pre>
+        <table class="proj-table">
+          <thead><tr><th>Metric</th><th>Pre-promotion (monthly avg)</th><th>Post-promotion (May, simulated)</th></tr></thead>
+          <tbody>
+            <tr><td>Orders</td><td>32.5</td><td>50</td></tr>
+            <tr><td>Total revenue</td><td>$986.75</td><td>$2,077.50</td></tr>
+            <tr><td>Average order value</td><td>$30.36</td><td>$41.55</td></tr>
+          </tbody>
+        </table>
+        <p class="proj-note">⚠️ The May figures come from <strong>simulated orders I generated</strong> to test the tracking query — they show how the before/after comparison works, not a real-world result. In a real setting, I would validate the effect with a controlled test (promotion vs. no-promotion period or branch).</p>
+      </section>
+
+      <section class="proj-section">
+        <h2>6 · Conclusion</h2>
+        <p>The project covers the full analytics workflow on a database I designed myself: modeling the business in an ER diagram, building it in MySQL, querying it with SQL across four business areas, and translating the findings into 16 concrete, measurable strategies. The strongest levers were <strong>raising order value</strong> (combos, Trio Deal, upselling), <strong>building loyalty</strong> (no repeat customers yet), and <strong>growing Drinks &amp; Desserts</strong>. Next steps would be tracking retention and repeat purchases and gathering menu feedback (e.g. desserts).</p>
+        <p class="proj-ref"><strong>Data:</strong> synthetic Thai restaurant dataset (Jan–May 2025) · <strong>Tools:</strong> MySQL, SQL, Power BI</p>
+      </section>
+
+      <div class="proj-foot">
+        <a href="../index.html#portfolio" class="btn btn-outline">← Back to all projects</a>
+        <a href="https://coda.io/d/_dsMprpHT7Dx/Final-Project-Restaurant-Sales-Optimization_su_0Qp3b" target="_blank" rel="noopener" class="btn btn-outline">View original on Coda ↗</a>
+      </div>
+
+    </div>
+  </article>
+
+  <footer class="footer">
+    <p>© 2026 Supawit Naewjampa · Data Analyst</p>
+  </footer>
+
+  <script src="project.js"></script>
+</body>
+</html>

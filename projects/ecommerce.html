@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Commerce Product Sales Analysis — Supawit Naewjampa</title>
+  <meta name="description" content="Analysis of 20,000 e-commerce sales transactions: top products, customer behavior by gender and age, quarterly demand by region, and SWOT. By Supawit Naewjampa." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>" />
+  <link rel="stylesheet" href="../style.css?v=5" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="proj-page">
+
+  <nav class="nav nav--proj" id="nav">
+    <a href="../index.html" class="nav-logo">SN</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#portfolio">← All Projects</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <article class="proj proj--ecom">
+    <div class="proj-cover" style="background-image:url('../images/cover-ecommerce.jpg')"></div>
+    <nav class="proj-toc" aria-label="On this page"></nav>
+    <div class="proj-container">
+
+      <header class="proj-hero">
+        <div class="proj-eyebrow">🛍️ Case Study · 2025</div>
+        <h1>E-Commerce Product Sales Analysis</h1>
+        <p class="proj-lead">Analyzing 20,000 online sales transactions to uncover top-selling products, customer purchasing behavior, and quarterly demand by region — to support marketing, inventory, and pricing decisions.</p>
+        <p class="proj-stack"><strong>Stack:</strong> Power BI · Excel · Data Visualization · Customer Segmentation · SWOT</p>
+        <div class="proj-results">
+          <div><span class="pr-val">20,000</span><span class="pr-lab">Transactions</span></div>
+          <div><span class="pr-val">5</span><span class="pr-lab">Products · 2 categories</span></div>
+          <div><span class="pr-val">#1</span><span class="pr-lab">Smartwatch (top seller)</span></div>
+          <div><span class="pr-val">50 / 50</span><span class="pr-lab">Female / Male split</span></div>
+        </div>
+      </header>
+
+      <section class="proj-section">
+        <h2>1 · Introduction</h2>
+        <p>In the digital era, where e-commerce businesses are growing rapidly, analyzing product sales data is crucial for understanding market trends, customer behavior, and product performance. The <strong>E-Commerce Product Sales</strong> dataset from Kaggle provides insight into online sales, including order details, revenue, product categories, and other key factors.</p>
+        <p>This project analyzes sales trends to uncover key insights — top-selling products, factors influencing sales, and customer purchasing behavior — that help a business refine its marketing strategy, optimize inventory, and set effective pricing to maximize revenue.</p>
+        <p><strong>Dataset columns:</strong> Sale ID, Product Name, Category, Price (USD), Quantity, Customer Age, Customer Gender, Discount, Payment Method, Region, Sale Date, Total Sales (USD).</p>
+      </section>
+
+      <section class="proj-section">
+        <h2>2 · Product Analysis</h2>
+        <p>There are five products in two categories: <strong>Accessories</strong> (headphones) and <strong>Electronics</strong> (laptops, smartphones, smartwatches, tablets).</p>
+        <figure>
+          <img src="../images/ecom/fig1_category.png" alt="Product categories" loading="lazy" />
+          <figcaption>Figure 1 · Product categories</figcaption>
+        </figure>
+        <p>Across the 20,000 transactions, the analysis compared purchase volume and revenue by product.</p>
+        <figure>
+          <img src="../images/ecom/fig2_qty_total.png" alt="Sum of quantity and total sales by product" loading="lazy" />
+          <figcaption>Figure 2 · Sum of quantity and total sales</figcaption>
+        </figure>
+        <p class="proj-note">📊 <strong>Smartwatches</strong> recorded the highest sales, followed by tablets, smartphones, headphones, and laptops.</p>
+        <figure>
+          <img src="../images/ecom/fig3_price.png" alt="Product price distribution" loading="lazy" />
+          <figcaption>Figure 3 · Product price distribution — minimum, mean, and maximum (USD)</figcaption>
+        </figure>
+      </section>
+
+      <section class="proj-section">
+        <h2>3 · Customer Analysis</h2>
+        <p>Orders were broken down by gender and product to show which products are most popular with each group — input for next quarter’s marketing plan.</p>
+        <figure>
+          <img src="../images/ecom/fig4_gender_orders.png" alt="Orders by gender" loading="lazy" />
+          <figcaption>Figure 4 · Number of orders by gender</figcaption>
+        </figure>
+        <p>To understand purchasing behavior further, order volume was compared across age groups and gender to find the segments with the highest order volume.</p>
+        <figure>
+          <img src="../images/ecom/fig5_gender_age.png" alt="Sales volume by gender and age group" loading="lazy" />
+          <figcaption>Figure 5 · Sales volume by gender and age group</figcaption>
+        </figure>
+        <p>The customer base splits almost exactly in half between female and male customers — so products appeal broadly, and campaigns can be tuned by age rather than gender.</p>
+        <figure>
+          <img src="../images/ecom/fig6_gender_pct.png" alt="Percentage of customers by gender" loading="lazy" />
+          <figcaption>Figure 6 · Customer share by gender (50.29% female · 49.71% male)</figcaption>
+        </figure>
+        <p>Payment behavior was analyzed across four methods: Bank Transfer, Credit Card, Debit Card, and PayPal.</p>
+        <figure>
+          <img src="../images/ecom/fig7_payment.png" alt="Transactions by payment method" loading="lazy" />
+          <figcaption>Figure 7 · Transactions by payment method — Debit Card leads (27,924)</figcaption>
+        </figure>
+        <p>Finally, purchases were segmented by age group within each gender to see which demographic buys which product most often.</p>
+        <figure>
+          <img src="../images/ecom/fig8_male.png" alt="Male purchasing behavior by age group" loading="lazy" />
+          <figcaption>Figure 8 · Male customers — purchases by product and age group</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/ecom/fig9_female.png" alt="Female purchasing behavior by age group" loading="lazy" />
+          <figcaption>Figure 9 · Female customers — purchases by product and age group</figcaption>
+        </figure>
+      </section>
+
+      <section class="proj-section">
+        <h2>4 · Quarter Analysis</h2>
+        <p>Orders were segmented by quarter and continent (2023–2024) to see which region ordered most in each period — a basis for inventory planning in the upcoming quarter.</p>
+        <figure>
+          <img src="../images/ecom/fig10_continent_q.png" alt="Orders by continent per quarter" loading="lazy" />
+          <figcaption>Figure 10 · Product orders by continent, per quarter</figcaption>
+        </figure>
+        <p>The same view by product shows which products peak in which quarter.</p>
+        <figure>
+          <img src="../images/ecom/fig11_product_q.png" alt="Product order volume by quarter" loading="lazy" />
+          <figcaption>Figure 11 · Product order volume, Q1–Q4</figcaption>
+        </figure>
+      </section>
+
+      <section class="proj-section">
+        <h2>5 · SWOT Analysis</h2>
+        <table class="proj-table">
+          <thead><tr><th>✅ Strengths</th><th>⚠️ Weaknesses</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><ul>
+                <li>High total sales for certain products</li>
+                <li>Diverse customer demographics — enables targeted campaigns</li>
+                <li>Sales spread across regions (Asia, Africa, South America) — less dependence on one market</li>
+                <li>Discounts help boost sales and conversion</li>
+              </ul></td>
+              <td><ul>
+                <li>Sales concentrated in Electronics — high competition</li>
+                <li>Large price variation — longer purchase decisions for expensive items</li>
+                <li>Inconsistent discount strategy — may affect perceived value</li>
+                <li>Less-used payment methods may raise cart abandonment</li>
+              </ul></td>
+            </tr>
+          </tbody>
+          <thead><tr><th>📈 Opportunities</th><th>⚡ Threats</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><ul>
+                <li>Expand into new markets with region-targeted marketing</li>
+                <li>Optimize promotions by finding the most effective discount structures</li>
+                <li>Age-specific marketing campaigns</li>
+                <li>New payment options (e.g. Buy Now, Pay Later)</li>
+              </ul></td>
+              <td><ul>
+                <li>Intense e-commerce competition on price and service</li>
+                <li>Electronics prices depreciate quickly — inventory devaluation</li>
+                <li>Cross-region shipping costs and delivery delays</li>
+                <li>Shifts in consumer interest away from electronics</li>
+              </ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="proj-section">
+        <h2>6 · Conclusion</h2>
+        <h3>Sales performance</h3>
+        <p>Sales are strongest in the <strong>Electronics</strong> category, with smartwatches, laptops, and smartphones driving revenue. High-value products contribute most of total sales, while affordable items keep a steady volume. Regional distribution shows substantial sales in South America, Asia, and Africa — strong international demand and room for expansion.</p>
+        <h3>Customer behavior</h3>
+        <p>The customer base spans many age groups and is almost evenly split by gender, so products appeal broadly and campaigns can be tailored by age segment. Debit Card and PayPal are popular payment methods — optimizing the checkout experience could lift conversion and reduce cart abandonment.</p>
+        <h3>Risks</h3>
+        <p>Competition in electronics is intense, with pricing pressure and fast innovation cycles. Demand fluctuations can cause overstock or shortages, so inventory planning should use the quarterly demand patterns above. International shipping costs and delays also need managing.</p>
+        <p class="proj-ref"><strong>Dataset:</strong> E-Commerce Product Sales (Kaggle) · <strong>Tools:</strong> Power BI, Excel</p>
+      </section>
+
+      <div class="proj-foot">
+        <a href="../index.html#portfolio" class="btn btn-outline">← Back to all projects</a>
+        <a href="https://spice-bonobo-fb7.notion.site/E-Commerce-Product-Sales-19c17aaf703680258647c594eb181c4d" target="_blank" rel="noopener" class="btn btn-outline">View original on Notion ↗</a>
+      </div>
+
+    </div>
+  </article>
+
+  <footer class="footer">
+    <p>© 2026 Supawit Naewjampa · Data Analyst</p>
+  </footer>
+
+  <script src="project.js"></script>
+</body>
+</html>

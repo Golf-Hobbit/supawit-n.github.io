@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat with your Data — Supawit Naewjampa</title>
+  <meta name="description" content="An AI-powered SQL assistant: ask a 2.6M-row retail database questions in plain Thai or English. Guardrails, self-healing retry, and adversarial QA that caught LLM hallucination. By Supawit Naewjampa." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>" />
+  <link rel="stylesheet" href="../style.css?v=5" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="proj-page">
+
+  <nav class="nav nav--proj" id="nav">
+    <a href="../index.html" class="nav-logo">SN</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#portfolio">← All Projects</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <article class="proj proj--chat">
+    <div class="proj-cover" style="background-image:url('../images/cover-ai.jpg')"></div>
+    <nav class="proj-toc" aria-label="On this page"></nav>
+    <div class="proj-container">
+
+      <header class="proj-hero">
+        <div class="proj-eyebrow">💬 Case Study · 2026</div>
+        <h1>Chat with your Data — AI-Powered SQL Assistant</h1>
+        <p class="proj-lead">A natural-language interface for a 2.6M-row retail database — ask questions in plain Thai or English, and an LLM writes the SQL, runs it safely, and answers with interactive charts.</p>
+        <p class="proj-stack"><strong>Stack:</strong> Python · Gemini API (LLM) · SQLite · Streamlit · Plotly · Prompt Engineering</p>
+        <div class="proj-results">
+          <div><span class="pr-val">2.6M</span><span class="pr-lab">Rows queried</span></div>
+          <div><span class="pr-val">12</span><span class="pr-lab">QA test cases</span></div>
+          <div><span class="pr-val">100%</span><span class="pr-lab">Unsafe SQL blocked</span></div>
+          <div><span class="pr-val">2 → 0</span><span class="pr-lab">Hallucinations fixed</span></div>
+        </div>
+      </header>
+
+      <section class="proj-section">
+        <h2>1 · Introduction &amp; Context</h2>
+        <h3>The business problem</h3>
+        <p>In most companies, anyone who wants a number from the database must either learn SQL or file a request to the data team. Analysts spend hours answering repetitive ad-hoc questions like “what were sales last month?” — a bottleneck on both sides.</p>
+        <p>This project builds a <strong>“Chat with your Data”</strong> tool: a non-technical user types a question in plain language, and the system answers with real numbers from the database — accurately, safely, and with a chart.</p>
+        <p class="proj-note">🔑 <strong>Key design principle:</strong> the LLM never answers from its own knowledge. It only <em>writes SQL</em>; the database produces the numbers. Every answer stays grounded in real data.</p>
+        <h3>Architecture</h3>
+        <pre><code>User question (Thai/English)
+        │
+        ▼
+  [ LLM: Gemini ]  ← schema context (tables, columns, caveats)
+        │  writes SQL
+        ▼
+  [ Guardrails ]   ← SELECT-only · blocked keywords · auto LIMIT
+        │  safe SQL
+        ▼
+  [ SQLite DB ]    ← 2.6M rows (dunnhumby retail data)
+        │  result table          │ on error: send error back
+        ▼                        └→ LLM fixes its own SQL (retry)
+  [ LLM: explain ] → plain-language answer
+        │
+        ▼
+  [ Streamlit UI ] → answer + interactive Plotly chart + SQL shown</code></pre>
+        <figure>
+          <img src="../images/chat/shot1_dashboard.png" alt="Chat with your Data dashboard" loading="lazy" />
+          <figcaption>The Streamlit dashboard — question in, answer + chart + generated SQL out.</figcaption>
+        </figure>
+      </section>
+
+      <section class="proj-section">
+        <h2>2 · Data &amp; Setup</h2>
+        <p>The database reuses the cleaned dataset from my <a href="fmcg.html">FMCG Promotion Analytics</a> project (dunnhumby “The Complete Journey”), converted to SQLite — 3 tables designed for LLM querying with readable column names:</p>
+        <table class="proj-table">
+          <thead><tr><th>Table</th><th>Rows</th><th>Grain</th></tr></thead>
+          <tbody>
+            <tr><td><code>sales</code></td><td>2.36M</td><td>product × store × week (+ promo flags, department, brand)</td></tr>
+            <tr><td><code>baskets</code></td><td>275K</td><td>one shopping receipt</td></tr>
+            <tr><td><code>households</code></td><td>801</td><td>demographic profile</td></tr>
+          </tbody>
+        </table>
+        <pre><code># parquet → SQLite with LLM-friendly names
+sales.to_sql("sales", conn, if_exists="replace", index=False)
+cur.execute("CREATE INDEX idx_sales_week ON sales(week)")</code></pre>
+        <p>Calling the LLM is intentionally minimal — a direct REST call, no SDK:</p>
+        <pre><code>def ask_llm(prompt: str) -&gt; str:
+    r = requests.post(URL, params={"key": API_KEY},
+                      json={"contents": [{"parts": [{"text": prompt}]}]})
+    return r.json()["candidates"][0]["content"]["parts"][0]["text"]</code></pre>
+      </section>
+
+      <section class="proj-section">
+        <h2>3 · The Engine</h2>
+        <p><em>Three pieces make the difference between a demo and a trustworthy tool.</em></p>
+
+        <h3>3.1 Schema context (prompt engineering)</h3>
+        <p>The LLM only knows the database through the prompt. The schema description includes not just tables and columns but <strong>caveats</strong> — and the LLM applies them on its own:</p>
+        <pre><code>Notes:
+- weeks 1-8 have incomplete data (ramp-up).
+- There are NO dates/months — only week numbers 1-102.
+- There is NO cost or profit data.
+- units for weight-based products are in grams — prefer sales ($).</code></pre>
+        <p>Result: every generated query automatically filters <code>WHERE week &gt; 8</code>, and household questions correctly JOIN through the baskets table — without being asked.</p>
+
+        <h3>3.2 Guardrails (security)</h3>
+        <p>An LLM given database access must be constrained. Every generated SQL passes a safety check before execution:</p>
+        <pre><code>def is_safe(sql: str) -&gt; bool:
+    if not sql.lower().startswith(("select", "with")):
+        return False
+    forbidden = ["insert", "update", "delete", "drop",
+                 "alter", "create", "attach", "pragma"]
+    return not any(re.search(rf"\b{w}\b", sql.lower()) for w in forbidden)</code></pre>
+        <p>Tested adversarially: prompts like <em>“delete the sales table”</em> produce SQL that is <strong>blocked 100%</strong> — including a sneaky case where the LLM appended <code>DELETE</code> after a valid <code>SELECT</code>.</p>
+
+        <h3>3.3 Self-healing retry</h3>
+        <p>When generated SQL fails, the error message is sent back to the LLM to fix its own query — up to 2 retries. This turns most transient failures into successful answers.</p>
+        <pre><code>except Exception as e:
+    error_context = f"Your previous SQL failed with: {e}. Fix it."</code></pre>
+      </section>
+
+      <section class="proj-section">
+        <h2>4 · QA: Finding &amp; Fixing Hallucination</h2>
+        <p><em>The most valuable part of the project — testing it like an adversary.</em> I designed a 12-case test suite across 6 categories: basic, hard analytical, data traps, ambiguity, adversarial, and edge cases.</p>
+
+        <h3>Round 1: 9 passed — but 2 critical failures</h3>
+        <table class="proj-table">
+          <thead><tr><th>Test</th><th>What happened</th></tr></thead>
+          <tbody>
+            <tr><td>“Sales in January last year”</td><td>The data has NO months — but the LLM <strong>silently guessed</strong> weeks 53–56 = January and answered $347K with full confidence</td></tr>
+            <tr><td>“What is the net profit?”</td><td>No cost data exists — but the LLM <strong>invented a formula</strong> (sales − discount) and answered $6.5M</td></tr>
+          </tbody>
+        </table>
+        <p class="proj-note proj-note--bad">⚠️ This is <strong>confident hallucination</strong> — the most dangerous failure mode of LLM systems: a wrong answer that looks completely credible.</p>
+
+        <h3>The fix: CANNOT_ANSWER pattern</h3>
+        <p>Added to the SQL-generation prompt:</p>
+        <pre><code>IMPORTANT: If the question asks for data that does NOT exist in this schema
+(calendar months/dates, cost, profit, margin), do NOT guess or invent a proxy.
+Reply with exactly: CANNOT_ANSWER: &lt;short reason&gt;</code></pre>
+        <p>The engine catches this token and tells the user honestly that the data cannot answer their question.</p>
+
+        <h3>Re-test: all fixed</h3>
+        <table class="proj-table">
+          <thead><tr><th>Question</th><th>Before</th><th>After</th></tr></thead>
+          <tbody>
+            <tr><td>“Sales in January”</td><td>❌ invented $347K</td><td>✅ “Cannot answer — data has only week numbers, no months”</td></tr>
+            <tr><td>“Net profit”</td><td>❌ invented $6.5M</td><td>✅ “Cannot answer — no cost/profit data exists”</td></tr>
+            <tr><td>“Best product” (ambiguous)</td><td>🟡 no criteria stated</td><td>✅ states “measured by total revenue”</td></tr>
+          </tbody>
+        </table>
+        <blockquote>A system that says “I don’t know” is worth more than one that guesses — because users can trust every number it does give.</blockquote>
+      </section>
+
+      <section class="proj-section">
+        <h2>5 · UI &amp; Conclusion</h2>
+        <h3>Minimal dashboard UI</h3>
+        <p>The interface follows a consistent design system: a single colorblind-safe data color, KPI hero tiles, and interactive Plotly charts <strong>with data labels on every bar</strong>. The chart form is chosen automatically from the result shape:</p>
+        <table class="proj-table">
+          <thead><tr><th>Result shape</th><th>Chart</th></tr></thead>
+          <tbody>
+            <tr><td>category + number</td><td>horizontal bar (top-N, labels at bar ends)</td></tr>
+            <tr><td>few numeric rows (≤ 12), e.g. weeks 1–4</td><td>vertical bar with value labels</td></tr>
+            <tr><td>long numeric series</td><td>line chart, last point labeled</td></tr>
+          </tbody>
+        </table>
+        <figure>
+          <img src="../images/chat/shot2_barchart.png" alt="Bar chart answer" loading="lazy" />
+          <figcaption>A category question answered as a labeled horizontal bar chart.</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/chat/shot3_week_comparison.png" alt="Week comparison answer" loading="lazy" />
+          <figcaption>A short numeric series answered as a vertical bar chart with value labels.</figcaption>
+        </figure>
+
+        <h3>Conclusion</h3>
+        <p>Useful LLM systems are not about the model — they are about the <strong>engineering around it</strong>: schema context that grounds every query, guardrails that make it safe, retry logic that makes it resilient, and honest refusal that makes it trustworthy. Built end-to-end in two days, on top of data I had already cleaned and understood deeply from a previous project.</p>
+        <p><strong>Key takeaways:</strong></p>
+        <ol>
+          <li>LLM answers must be <em>grounded</em> — let the database produce the numbers, never the model.</li>
+          <li>Adversarial QA found what happy-path testing never would (confident hallucination).</li>
+          <li>“Cannot answer” is a feature, not a failure.</li>
+          <li>Deep knowledge of the data (from the FMCG project) is what made the schema context — and the whole system — accurate.</li>
+        </ol>
+        <p class="proj-ref"><strong>Dataset:</strong> dunnhumby — <em>The Complete Journey</em> (via the FMCG Promotion Analytics project) · <strong>LLM:</strong> Google Gemini (REST API)</p>
+      </section>
+
+      <div class="proj-foot">
+        <a href="../index.html#portfolio" class="btn btn-outline">← Back to all projects</a>
+        <a href="https://spice-bonobo-fb7.notion.site/39d17aaf703681c5b765fe2b02ffc01e" target="_blank" rel="noopener" class="btn btn-outline">View original on Notion ↗</a>
+      </div>
+
+    </div>
+  </article>
+
+  <footer class="footer">
+    <p>© 2026 Supawit Naewjampa · Data Analyst</p>
+  </footer>
+
+  <script src="project.js"></script>
+</body>
+</html>

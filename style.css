@@ -206,6 +206,9 @@ ul { list-style: none; }
   align-items: flex-start;
   padding: 1rem;
   position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .card-tag {
@@ -402,10 +405,10 @@ ul { list-style: none; }
   margin-bottom: 0.4rem;
 }
 
-.card-img--db   { background: linear-gradient(135deg, #eef2f7 0%, #dce6f0 100%); }
-.card-img--ecom { background: linear-gradient(135deg, #f0f4ee 0%, #deecd8 100%); }
-.card-img--fmcg { background: linear-gradient(135deg, #fef9ec 0%, #fdebc8 100%); }
-.card-img--chat { background: linear-gradient(135deg, #f3f0fa 0%, #e2daf3 100%); }
+.card-img--db   { background-image: linear-gradient(rgba(0,0,0,0.10), rgba(0,0,0,0.28)), url('images/restaurant.jpg'); }
+.card-img--ecom { background-image: linear-gradient(rgba(0,0,0,0.10), rgba(0,0,0,0.28)), url('images/ecommerce.jpg'); }
+.card-img--fmcg { background-image: linear-gradient(rgba(0,0,0,0.10), rgba(0,0,0,0.28)), url('images/grocery.jpg'); }
+.card-img--chat { background-image: linear-gradient(rgba(0,0,0,0.10), rgba(0,0,0,0.28)), url('images/ai.jpg'); }
 
 /* ── Skills ── */
 .skill-group { margin-bottom: 1.5rem; }
@@ -418,6 +421,12 @@ ul { list-style: none; }
 }
 
 .skill-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+/* Capability-based skills (replaces arbitrary % bars) */
+.skill-cap { list-style: none; display: flex; flex-direction: column; gap: 0.85rem; }
+.skill-cap li { display: flex; flex-direction: column; gap: 0.15rem; }
+.cap-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+.cap-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
 
 .skill-item {
   display: flex;
